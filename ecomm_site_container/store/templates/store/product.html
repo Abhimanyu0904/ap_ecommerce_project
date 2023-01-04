@@ -1,0 +1,98 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block content %}
+
+
+  <section class="section all-products" id="products">
+    <div class="top-container">
+      {% if search_term and not error_message %}
+      <h2>Showing results for "{{ search_term }}"</h2>
+      {% endif %}
+      {% if curr_user %}
+      <form action="{% url 'store:products' curr_user.id %}" method="get">
+      {% else %}
+      <form action="{% url 'store:anon_products' %}" method="get">
+      {% endif %}
+    
+        <select name="sort" style="margin: 1rem;">
+          <option value="" {% if not sort_criterion %}selected{% endif %}>
+            Sort by: None
+          </option>
+          <option value="sort_price_HtoL" {% if sort_criterion == "sort_price_HtoL" %}selected{% endif %}>
+            Sort by Price (High to Low)
+          </option>
+          <option value="sort_price_LtoH" {% if sort_criterion == "sort_price_LtoH" %}selected{% endif %}>
+            Sort by Price (Low to High)
+          </option>
+          <option value="sort_rating_HtoL" {% if sort_criterion == "sort_rating_HtoL" %}selected{% endif %}>
+            Sort by Rating (High to Low)
+          </option>
+          <option value="sort_rating_LtoH" {% if sort_criterion == "sort_rating_LtoH" %}selected{% endif %}>
+            Sort by Rating (Low to High)
+          </option>
+          <option value="sort_name_AtoZ" {% if sort_criterion == "sort_name_AtoZ" %}selected{% endif %}>
+            Sort by Name (A to Z)
+          </option>
+          <option value="sort_name_ZtoA" {% if sort_criterion == "sort_name_ZtoA" %}selected{% endif %}>
+            Sort by Name (Z to A)
+          </option>
+        </select>
+        
+        <input type="checkbox" id="cat_sports" name="sports-filter" {% if sports_filter %}checked{% endif %}>
+        <label for="cat_sports" style="margin-right: 0.7rem;"> Sports Shoes</label>
+
+        <input type="checkbox" id="cat_formal" name="formal-filter" {% if formal_filter %}checked{% endif %}>
+        <label for="cat_formal" style="margin-right: 0.7rem;"> Formal Shoes</label>
+        
+        <input type="checkbox" id="cat_flipflops" name="flipflops-filter" {% if flipflops_filter %}checked{% endif %}>
+        <label for="cat_flipflops" style="margin-right: 0.7rem;"> Flip Flops</label>
+        
+        <input type="checkbox" id="cat_casual" name="casual-filter" {% if casual_filter %}checked{% endif %}>
+        <label for="cat_casual" style="margin-right: 0.7rem;"> Casual Shoes</label>
+
+        {% if search_term %}
+        <input type="hidden" name="inputbar" value="{{ search_term }}">
+        {% endif %}
+
+        <button type="submit" style="margin: 1rem;">Apply</button>
+      </form>          
+    </div>
+    <br>
+    {% if error_message %}
+    <h1><b>{{ error_message }}</b></h1>
+    {% endif %}
+    
+    <div class="prods-center container">
+      {% for product in products %}  
+      <div class="prods">
+        <div class="prods-hd">
+          {% if curr_user %}
+          <a href="{% url 'store:product-details' curr_user.id product.id %}">
+          {% else %}
+          <a href="{% url 'store:anon_product-details' product.id %}">
+          {% endif %}
+            <img src="{% static product.get_img_name %}" alt="">
+          </a>
+        </div>
+          
+        <div class="prods-footer">
+          {% if curr_user %}
+          <a href="{% url 'store:product-details' curr_user.id product.id %}">
+          {% else %}
+          <a href="{% url 'store:anon_product-details' product.id %}">
+          {% endif %}
+            <h3>{{ product.name }}</h3>
+          </a>
+          <div class="rating">
+            <h4>Rating: {{ product.get_avg_rating }}</h4>
+          </div>
+          <h3 class="price">{{ product.price }}</h3>
+        </div>
+      </div>            
+      {% endfor %}
+    </div>
+  </section>  
+  
+{% endblock content %}
+
+

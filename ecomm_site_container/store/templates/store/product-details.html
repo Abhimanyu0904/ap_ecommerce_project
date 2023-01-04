@@ -1,0 +1,128 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block content %}
+
+    <section class="product-details">
+      <div class="details container-md">
+        <div class="left">
+          <div class="main">
+            <img src="{% static product.get_img_name %}" alt="">
+          </div>
+        </div>
+        <div class="right">
+          <h1>{{ product.name }}</h1>
+          <h4>Rating: {{ product.get_avg_rating }} (based on {{ product.get_review_count }} reviews)</h4>
+          <div class="price">
+            {{ product.price }} 
+          </div>
+          <br/>
+
+          {% if curr_user %}
+          <form id="cart-form" action="{% url 'store:add-to-cart' curr_user.id product.id %}" method="post">
+            {% csrf_token %}
+          {% else %}
+          <form id="cart-form" action="{% url 'store:product-signin-redirect' product.id %}" method="get">
+          {% endif %}
+
+            <select name="size" required>
+              <option value="" selected disabled>Select Size</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+            </select>
+
+            <select name="quantity" required>
+              <option value="" selected disabled>Select Quantity</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </form>
+
+          <button type="submit" name="update-method" value="add" form="cart-form" style="margin: 0.5rem; border: 0px; font-size: 1.1rem;">
+            Add to Cart
+          </button>
+
+          {% if curr_user %}
+          <form action="{% url 'store:update-wishlist' curr_user.id product.id %}" method="post">
+            {% csrf_token %}
+          {% else %}
+          <form action="{% url 'store:product-signin-redirect' product.id %}" method="get">
+          {% endif %}
+            <button type="submit" name="update-method" value="add" style="margin: 0; border: 0px; font-size: 1.1rem;">
+              Add to Wishlist 
+              <div class="icons"><a><span><i class="bx bx-heart"></i></span></a></div>
+            </button>
+          </form>
+          <br>
+          <h3 style="margin-top: 1rem;">Product Details</h3>
+          <h5>{{ product.description }}</h5>
+            
+            <div class="reviews">
+              <ul>
+                {% if curr_user %}
+                <li>
+                  <form action="{% url 'store:review' curr_user.id product.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="review-container">
+                      <select name="rating" required>
+                        <option value="" selected disabled>Rating</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                      </select>
+                      <br>
+                      <textarea placeholder="Write Your review" name="review-text" rows="4" cols="50" required></textarea>
+                      <p>Note: If you submit multiple reviews for a product, only your latest review will be valid.</p>
+                      <button type="submit">Submit</button>
+                    </div>
+                  </form>
+                </li>
+                <br>
+                {% endif %}
+
+                {% for review in product.review_set.all %}
+                <li style="margin-bottom: 1rem;">
+                  <div class="name" style="margin-left: 0rem;">
+                    <h4><strong>{{ review.user.first_name }} {{ review.user.last_name }}</strong></h4>
+                  </div>
+
+                  {% if review.is_by_verified_buyer %}
+                  <button type="button" class="verified-but"
+                  style="margin: 1rem; background: transparent; color: darkorchid; 
+                  border: 2px solid darkorchid; padding: 0.5rem 1rem;">
+                    Verified Buyer
+                  </button>
+                  {% endif %}
+
+                  <div class="rating" style="margin-left: 1rem;">
+                  {% for i in "12345" %}
+                    {% if forloop.counter > review.rating %}
+                    <i class="bx bx-star fa-xs"></i>
+                    {% else %}
+                    <i class="bx bxs-star fa-xs"></i>
+                    {% endif %}
+                  {% endfor %}
+                  </div>
+
+                  <p style="text-align: center;">{{ review.review_text }}</p>
+                </li>
+                {% endfor %}
+
+                {% if not curr_user %}
+                <li><h4>Sign in to leave a review!</h4></li>
+                {% endif %}
+              </ul>
+            </div>
+        </div>
+      </div>
+    </section>
+    
+{% endblock content %}    

@@ -1,0 +1,128 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block content %}
+
+<center style="margin-top: 7rem;">
+  <table>
+    <tr>
+      <td style="width: fit-content;">
+        <a href="{% url 'store:wishlist' curr_user.id %}">
+          <center>
+            <button type="button" style="font-size: 2.5rem; width: 30rem; padding: 2rem 4.5rem; margin-right: 2rem;">
+              Wishlist 
+            </button>
+          </center>
+        </a>
+      </td>
+      <td>
+        <a href="{% url 'store:cart' curr_user.id %}">
+          <center>
+            <button type="button" style="font-size: 2.5rem; width: 30rem; padding: 2rem 4.5rem; margin-left: 2rem;">
+              Cart 
+            </button>
+          </center>
+        </a>
+      </td>
+  </tr>
+</table>
+</center>
+<br>
+<div class="personal-info">
+  <div class="prdt-box">
+    <div class="content">
+      <table>
+        <tr>
+          <td>
+            <h2>Update Personal Info</h2>
+          </td>
+          
+          <td style="padding-bottom: 1em; padding-left: 4rem;">
+            <h2>Your Address:-</h2>
+            <div style="margin-left: 10rem; width: 80%;">
+              <div style="text-align: center; color: white;">
+                {{ curr_user.address|linebreaks }}
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="but-update">
+              <form action="{% url 'store:pers-details' curr_user.id %}" method="get" style="padding: 0px; margin-left: 2rem;">
+                <button type="submit" style="margin: 0; font-size: 1.1rem;">Update Info</button>
+              </form>
+            </div>
+          </td>
+          <td>
+            <div class="but-update">
+              <form action="{% url 'store:address' curr_user.id %}" method="get" style="padding: 0px; margin-left: 8rem;">
+                <button type="submit" style="margin: 0; border: 0px; font-size: 1.1rem;">Update Address</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>        
+  </div>      
+</div>
+
+<div class="your-order" style="margin: 2rem; background-color: white;">
+  <h1 style="background-color: #deb9f7;">Your Orders</h1>
+  {% for order in curr_user.order_set.all %}
+  <div class="order-header" style="border-top: 0.1rem solid;">
+    <table style="margin-top: 2rem;">
+      <tbody>
+        <tr>
+          <td><h2>Order #{{ order.id }}</h2></td>
+          <td><h2 style="text-align: right;">Status: {{ order.get_updated_status }}</h2></td>
+        </tr>
+  
+        <tr>
+          <td><h3 style="text-align: center; margin: 0rem 1rem;">{{ order.total_quantity }} items</h3></td>
+          <td><h3 style="text-align: center; margin: 0rem 1rem;">Placed on: {{ order.ordered_on }}</h3></td>
+          <td><h3 style="text-align: center; margin: 0rem 2rem;">Order Amount: {{ order.order_total }}</h3></td>
+          
+          {% if order.get_updated_status == "Confirmed" or order.get_updated_status == "In Transit" %}
+          <td>
+            <form action="{% url 'store:cancel-order' curr_user.id order.id %}" method="post"
+            style="margin: 0rem 1rem;">
+              {% csrf_token %}
+              <button type="submit" style="margin-top: 0rem;">Cancel order</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+  
+      </tbody>
+    </table>
+  </div>
+
+  {% for orderitem in order.orderitem_set.all %}
+  <div class="Cart-Container">
+    <div class="Cartitems">
+      <div class="imgb">
+        <a href="{% url 'store:product-details' curr_user.id orderitem.product.id %}">
+          <img src="{% static orderitem.product.get_img_name %}"/>
+        </a>
+      </div>
+      <div class="itom">
+        <a href="{% url 'store:product-details' curr_user.id orderitem.product.id %}">
+          <h1 class="Name">{{ orderitem.product.name }}</h1>
+        </a>
+        <h3 class="Description">{{ orderitem.product.category.name }}&nbsp;&nbsp; Size: {{ orderitem.size }}</h3>
+      </div>
+      
+      <div class="Amount">{{ orderitem.quantity }}</div>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% empty %}
+  <h2>You have no orders yet.</h2>
+  
+  {% endfor %}
+  
+</div>
+
+{% endblock content %}
